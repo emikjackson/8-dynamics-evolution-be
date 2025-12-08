@@ -20,7 +20,22 @@ export const getResultById = async (req, res) => {
 export const getResultByCode = async (req, res) => {
   try {
     const result = await Result.findOne({ resultCode: req.query.resultCode });
-    return res.status(200).json(result);
+    if (!result) {
+      return res.status(404).json({ msg: "Couldn't find a result with that code" });
+    }
+
+    // if it's an ending point code, pull the starting point data too and return it! :)
+    if (!result.isStart && result.startCode) {
+      const startingPointResults = await Result.findOne({ resultCode: result.startCode });
+      return res.status(200).json({
+        currentResults: result,
+        startingPointResults,
+      });
+    }
+
+    return res.status(200).json({
+      currentResults: result,
+    });
   } catch (e) {
     const msg = 'An error occurred while fetching results';
     console.error(msg);
@@ -41,13 +56,18 @@ export const addResult = async (req, res) => {
     resultCode = generateCode();
   }
 
+  console.log('HIIII', req.body);
+
   const result = new Result({
     ...req.body,
     resultCode,
   });
 
+  console.log('SAVED', result);
+
   await result.save();
-  return res.json(result);
+
+  return res.status(200).json(result);
 };
 
 export const deleteResult = async (req, res) => {

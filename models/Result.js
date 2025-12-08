@@ -17,8 +17,7 @@ const resultSchema = new mongoose.Schema(
     resultCode: String,
     isStart: Boolean,
 
-    startResultId: mongoose.ObjectId, // only for end timestamps, to associate them
-    startResultCode: String, // redundant, but just for easy verification
+    startCode: String,
   },
   {
     timestamps: true,
